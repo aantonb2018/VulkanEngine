@@ -1,0 +1,343 @@
+<scene>
+	<!-- Independent sample generator, one sample per pixel -->
+	<sampler type="independent">
+		<integer name="sampleCount" value="1"/>
+	</sampler>
+
+	<!-- Render the visible surface normals -->
+	<integrator type="normals"/>
+
+	<!-- Metal 0.00 -->
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.05"/>
+			<float name="metallic" value="0.0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="4.5, 4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.275"/>
+			<float name="metallic" value="0.0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="2.25, 4.5, 0.0"/>
+		</transform>
+	</mesh>
+	
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.5"/>
+			<float name="metallic" value="0.0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="0.0, 4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.725"/>
+			<float name="metallic" value="0.0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-2.25, 4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.95"/>
+			<float name="metallic" value="0.0"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-4.5, 4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<!-- Metal 0.25 -->
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.05"/>
+			<float name="metallic" value="0.25"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="4.5, 2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.275"/>
+			<float name="metallic" value="0.25"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="2.25, 2.25, 0.0"/>
+		</transform>
+	</mesh>
+	
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.5"/>
+			<float name="metallic" value="0.25"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="0.0, 2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.725"/>
+			<float name="metallic" value="0.25"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-2.25, 2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.95"/>
+			<float name="metallic" value="0.25"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-4.5, 2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<!-- Metal 0.50 -->
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.05"/>
+			<float name="metallic" value="0.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="4.5, 0.0, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.275"/>
+			<float name="metallic" value="0.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="2.25, 0.0, 0.0"/>
+		</transform>
+	</mesh>
+	
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.5"/>
+			<float name="metallic" value="0.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="0.0, 0.0, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.725"/>
+			<float name="metallic" value="0.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-2.25, 0.0, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.95"/>
+			<float name="metallic" value="0.5"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-4.5, 0.0, 0.0"/>
+		</transform>
+	</mesh>
+
+	<!-- Metal 0.75 -->
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.05"/>
+			<float name="metallic" value="0.75"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="4.5, -2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.275"/>
+			<float name="metallic" value="0.75"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="2.25, -2.25, 0.0"/>
+		</transform>
+	</mesh>
+	
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.5"/>
+			<float name="metallic" value="0.75"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="0.0, -2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.725"/>
+			<float name="metallic" value="0.75"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-2.25, -2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.95"/>
+			<float name="metallic" value="0.75"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-4.5, -2.25, 0.0"/>
+		</transform>
+	</mesh>
+
+	<!-- Metal 1.00 -->
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.05"/>
+			<float name="metallic" value="1.00"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="4.5, -4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.275"/>
+			<float name="metallic" value="1.00"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="2.25, -4.5, 0.0"/>
+		</transform>
+	</mesh>
+	
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.5"/>
+			<float name="metallic" value="1.00"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="0.0, -4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.725"/>
+			<float name="metallic" value="1.00"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-2.25, -4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+	<mesh type="obj">
+		<string name="filename" value=".\scenes\microfacetas\sphere.obj"/>
+		<bsdf type="microfacet">
+			<color name="albedo" value="0.5 0.0 0.0"/>
+			<float name="roughness" value="0.95"/>
+			<float name="metallic" value="1.00"/>
+		</bsdf>
+		<transform name="toWorld">
+			<translate value="-4.5, -4.5, 0.0"/>
+		</transform>
+	</mesh>
+
+
+	<!-- Lights -->
+	<emitter type="directional">
+		<direction name="direction" value="0.0 -1.0 -1.0"/>
+		<radiance name="radiance" value="0.6 0.2 0.2"/>
+	</emitter>
+
+	<!-- <emitter type="ambient">
+		<radiance name="radiance" value="0.01 0.01 0.01"/>
+	</emitter> -->
+	
+	<!-- Render the scene viewed by a perspective camera -->
+	<camera type="perspective">
+        <!-- 3D origin, target point, and 'up' vector -->
+		<transform name="toWorld">
+            <lookat target="0.0, 0.0, 0.0"
+                    origin="5.0, 5.0, 10.0"
+                    up="0.0, 1.0, 0.0"/>
+		</transform>
+
+		<!-- Field of view: 30 degrees -->
+		<float name="fov" value="65"/>
+
+		<!-- 768 x 768 pixels -->
+		<integer name="width" value="800"/>
+		<integer name="height" value="800"/>
+		<clip name="far" value = "100.0"/>
+	</camera>
+</scene>

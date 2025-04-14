@@ -55,7 +55,7 @@ void main() {
     f_position = pos.xyz;
 
     //normal in view space
-    mat3 normal_matrix = transpose( inverse( mat3( per_frame_data.m_view * per_object_data.objects[ gl_BaseInstance ].m_model ) ) );
+    mat3 normal_matrix = transpose( inverse( mat3(per_object_data.objects[ gl_BaseInstance ].m_model ) ) );
     f_normal = normal_matrix * v_normals;
 
     // uv
