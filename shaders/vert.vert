@@ -13,6 +13,7 @@ struct LightData
     vec4 m_light_pos;
     vec4 m_radiance;
     vec4 m_attenuattion;
+	mat4 m_view_projection;
 };
 
 layout( std140, set = 0, binding = 0 ) uniform PerFrameData

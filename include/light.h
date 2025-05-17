@@ -1,5 +1,6 @@
 #pragma once
 
+#include "camera.h"
 #include "common.h"
 #include "transform.h"
 
@@ -32,6 +33,7 @@ namespace MiniEngine
         {}
 
         static std::shared_ptr<Light> createLight(  const Runtime& i_runtime, const pugi::xml_node& emitter );
+        static Matrix4f getLightSpaceMatrix(std::shared_ptr<Light> i_light, Camera& i_camera);
 
         // we use this structure to define the light uniform buffer
         struct LightData
@@ -40,6 +42,14 @@ namespace MiniEngine
             Vector3f    m_radiance;
             Vector3f    m_position;
             Vector3f    m_attenuation;
+
+            // For shadows
+            Vector3f m_target = { 0, 0, 0 };
+            float m_fov = 75.0f;
+            float m_near = 0.01f;
+            float m_far = 10.0f;
+
+            Matrix4f    m_view_projection;
         };
         
         LightData m_data;

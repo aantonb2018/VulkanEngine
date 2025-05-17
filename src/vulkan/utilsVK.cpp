@@ -420,7 +420,7 @@ void UtilsVK::createImage(const DeviceVK& i_device, VkFormat i_format, VkImageUs
     }
 }
 
-void MiniEngine::UtilsVK::createImage(const DeviceVK& i_device, VkFormat i_format, VkImageUsageFlagBits i_usage_bits,
+void UtilsVK::createImage(const DeviceVK& i_device, VkFormat i_format, VkImageUsageFlagBits i_usage_bits,
     uint32_t i_width, uint32_t i_height, uint32_t i_depth, uint32_t i_mip_levels,
     ImageBlockType i_image_type, ImageBlock& o_image_block)
 {

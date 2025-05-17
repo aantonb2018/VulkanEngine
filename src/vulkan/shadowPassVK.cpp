@@ -1,6 +1,6 @@
 #include "common.h"
 #include "vulkan/utilsVK.h"
-#include "vulkan/depthPassVK.h"
+#include "vulkan/shadowPassVK.h"
 #include "vulkan/rendererVK.h"
 #include "vulkan/deviceVK.h"
 #include "vulkan/windowVK.h"
@@ -15,11 +15,11 @@
 using namespace MiniEngine;
 
 
-DepthPassVK::DepthPassVK(
+ShadowPassVK::ShadowPassVK(
     const Runtime& i_runtime,
-    const ImageBlock& i_depth_output) :
+    const ImageBlock& i_shadow_output) :
     RenderPassVK         ( i_runtime             ),
-    m_depth_output       ( i_depth_output        )   
+    m_shadow_output      ( i_shadow_output       )   
 {
     for( auto cmd : m_command_buffer )
     {
@@ -28,12 +28,12 @@ DepthPassVK::DepthPassVK(
 }
 
 
-DepthPassVK::~DepthPassVK()
+ShadowPassVK::~ShadowPassVK()
 {
 }
 
 
-bool DepthPassVK::initialize()
+bool ShadowPassVK::initialize()
 {
     RendererVK& renderer = *m_runtime.m_renderer;
 
@@ -45,6 +45,7 @@ bool DepthPassVK::initialize()
     //SHADER STAGES
     {
         VkShaderModule vert_module        = m_runtime.m_shader_registry->loadShader( "./shaders/vert.spv"       , VK_SHADER_STAGE_VERTEX_BIT   );
+        VkShaderModule geom_module        = m_runtime.m_shader_registry->loadShader( "./shaders/shadows.spv"       , VK_SHADER_STAGE_GEOMETRY_BIT);
         
         { // difuse
             VkPipelineShaderStageCreateInfo vert_shader{};
@@ -53,7 +54,14 @@ bool DepthPassVK::initialize()
             vert_shader.module  = vert_module;
             vert_shader.pName   = "main";
 
+            VkPipelineShaderStageCreateInfo geom_shader{};
+            geom_shader.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            geom_shader.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+            geom_shader.module = geom_module;
+            geom_shader.pName = "main";
+
             m_pipelines[ static_cast<uint32_t>( Material::TMaterial::Diffuse ) ].m_shader_stages[ 0 ] = vert_shader;
+            m_pipelines[ static_cast<uint32_t>( Material::TMaterial::Diffuse ) ].m_shader_stages[ 1 ] = geom_shader;
         }
 
         { // microfacetas
@@ -63,7 +71,14 @@ bool DepthPassVK::initialize()
             vert_shader.module = vert_module;
             vert_shader.pName = "main";
 
+            VkPipelineShaderStageCreateInfo geom_shader{};
+            geom_shader.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+            geom_shader.stage = VK_SHADER_STAGE_GEOMETRY_BIT;
+            geom_shader.module = geom_module;
+            geom_shader.pName = "main";
+
             m_pipelines[static_cast<uint32_t>(Material::TMaterial::Microfacets)].m_shader_stages[0] = vert_shader;
+            m_pipelines[static_cast<uint32_t>(Material::TMaterial::Microfacets)].m_shader_stages[1] = geom_shader;
         }
     }
 
@@ -84,7 +99,7 @@ bool DepthPassVK::initialize()
 }
 
 
-void DepthPassVK::shutdown()
+void ShadowPassVK::shutdown()
 {
     RendererVK& renderer = *m_runtime.m_renderer;
 
@@ -112,7 +127,7 @@ void DepthPassVK::shutdown()
 }
 
 
-VkCommandBuffer DepthPassVK::draw( const Frame& i_frame)
+VkCommandBuffer ShadowPassVK::draw( const Frame& i_frame)
 {
     RendererVK& renderer = *m_runtime.m_renderer;
 
@@ -127,7 +142,7 @@ VkCommandBuffer DepthPassVK::draw( const Frame& i_frame)
     VkCommandBufferBeginInfo begin_info{};
     begin_info.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
 
-    uint32_t width = 0, height = 0;
+    uint32_t width = 1024, height = 1024;
     renderer.getWindow().getWindowSize( width, height );
 
     VkRenderPassBeginInfo render_pass_info{};
@@ -148,7 +163,7 @@ VkCommandBuffer DepthPassVK::draw( const Frame& i_frame)
         throw MiniEngineException( "failed to begin recording command buffer!" );
     }
     
-    UtilsVK::beginRegion( current_cmd, "Depth Pass", Vector4f( 0.0f, 0.5f, 0.0f, 1.0f ) );
+    UtilsVK::beginRegion( current_cmd, "Shadow Pass", Vector4f( 0.0f, 0.5f, 0.0f, 1.0f ) );
     vkCmdBeginRenderPass( current_cmd, &render_pass_info, VK_SUBPASS_CONTENTS_INLINE );
 
     for( uint32_t mat_id = static_cast<uint32_t>( Material::TMaterial::Diffuse ); mat_id < static_cast<uint32_t>( m_pipelines.size() ); mat_id++ )
@@ -178,33 +193,33 @@ VkCommandBuffer DepthPassVK::draw( const Frame& i_frame)
 }
 
 
-void DepthPassVK::addEntityToDraw( const EntityPtr i_entity )
+void ShadowPassVK::addEntityToDraw( const EntityPtr i_entity )
 {
     m_entities_to_draw[ static_cast<uint32_t>( i_entity->getMaterial().getType() ) ].push_back( i_entity );
 }
 
 
 
-void DepthPassVK::createFbo()
+void ShadowPassVK::createFbo()
 {
     RendererVK& renderer = *m_runtime.m_renderer;
 
     uint32_t width = 0, height = 0;
-    renderer.getWindow().getWindowSize( width, height );
+    renderer.getWindow().getWindowSize(width, height);
 
     for( size_t i = 0; i < m_fbos.size(); i++ )
     {
         std::array<VkImageView, 1> attachments;
-        attachments[ 0 ] = m_depth_output.m_image_view;     // Depth attachment
+        attachments[ 0 ] = m_shadow_output.m_image_view;     // Shadow attachment
 
         VkFramebufferCreateInfo framebuffer_create_info = {};
         framebuffer_create_info.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
         framebuffer_create_info.renderPass      = m_render_pass;
         framebuffer_create_info.attachmentCount = static_cast< uint32_t >( attachments.size() );
         framebuffer_create_info.pAttachments    = attachments.data();
-        framebuffer_create_info.width           = width;
-        framebuffer_create_info.height          = height;
-        framebuffer_create_info.layers          = 1;
+        framebuffer_create_info.width           = 1024;
+        framebuffer_create_info.height          = 1024;
+        framebuffer_create_info.layers = 10;
 
         if( vkCreateFramebuffer( renderer.getDevice()->getLogicalDevice(), &framebuffer_create_info, nullptr, &m_fbos[ i ] ) )
         {
@@ -215,13 +230,13 @@ void DepthPassVK::createFbo()
 
 
 
-void DepthPassVK::createRenderPass()
+void ShadowPassVK::createRenderPass()
 {
     RendererVK& renderer = *m_runtime.m_renderer;
 
     VkAttachmentDescription attachment = {};
     // Depth attachment
-    attachment.format = m_depth_output.m_format;
+    attachment.format = m_shadow_output.m_format;
     attachment.samples = VK_SAMPLE_COUNT_1_BIT;
     attachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     attachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
@@ -273,7 +288,7 @@ void DepthPassVK::createRenderPass()
 }
 
 
-void DepthPassVK::createPipelines()
+void ShadowPassVK::createPipelines()
 {
     RendererVK& renderer = *m_runtime.m_renderer;
     
@@ -332,10 +347,10 @@ void DepthPassVK::createPipelines()
     raster_info.polygonMode             = VkPolygonMode::VK_POLYGON_MODE_FILL;
     raster_info.cullMode                = VK_CULL_MODE_NONE;
     raster_info.frontFace               = VK_FRONT_FACE_CLOCKWISE;
-    raster_info.depthBiasEnable         = VK_FALSE;
-    raster_info.depthBiasConstantFactor = 0.f;
+    raster_info.depthBiasEnable         = VK_TRUE;
+    raster_info.depthBiasConstantFactor = 2.f;
     raster_info.depthBiasClamp          = VK_FALSE;
-    raster_info.depthBiasSlopeFactor    = 0.f;
+    raster_info.depthBiasSlopeFactor    = 1.5f;
     raster_info.lineWidth               = 1.f;
     
     VkPipelineColorBlendAttachmentState color_blend_attachment{};
@@ -435,7 +450,6 @@ void DepthPassVK::createPipelines()
         pipeline_info.subpass               = 0;
         
         graphic_pipelines.push_back( pipeline_info );
-        
 
         if( vkCreateGraphicsPipelines( renderer.getDevice()->getLogicalDevice(), VK_NULL_HANDLE, 1, graphic_pipelines.data(), nullptr, &pipeline.m_pipeline ) )
         {
@@ -446,14 +460,14 @@ void DepthPassVK::createPipelines()
 }
 
 
-void DepthPassVK::createDescriptorLayout()
+void ShadowPassVK::createDescriptorLayout()
 {
     // PER FRAME
     VkDescriptorSetLayoutBinding per_frame_binding = {};
     per_frame_binding.binding                      = 0;
     per_frame_binding.descriptorCount              = 1;
     per_frame_binding.descriptorType               = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
-    per_frame_binding.stageFlags                   = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    per_frame_binding.stageFlags                   = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT;
 
     VkDescriptorSetLayoutCreateInfo set_per_frame_info = {};
     set_per_frame_info.sType        = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -467,7 +481,7 @@ void DepthPassVK::createDescriptorLayout()
     per_object_binding.binding                      = 0;
     per_object_binding.descriptorCount              = 1;
     per_object_binding.descriptorType               = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
-    per_object_binding.stageFlags                   = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
+    per_object_binding.stageFlags                   = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_GEOMETRY_BIT;
 
     VkDescriptorSetLayoutCreateInfo set_per_object_info = {};
     set_per_object_info.sType          = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
@@ -491,7 +505,7 @@ void DepthPassVK::createDescriptorLayout()
 }
 
 
-void DepthPassVK::createDescriptors()
+void ShadowPassVK::createDescriptors()
 {
     //create a descriptor pool that will hold 10 uniform buffers
     std::vector<VkDescriptorPoolSize> sizes =
