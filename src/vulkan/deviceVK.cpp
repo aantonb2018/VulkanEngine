@@ -106,6 +106,19 @@ void DeviceVK::createPhysicalDevice()
 
     m_physical_device = physical_devices[ selected_device ];
 
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelFeatures = {};
+    accelFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+
+    VkPhysicalDeviceFeatures2 features2 = {};
+    features2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
+    features2.pNext = &accelFeatures;
+
+    vkGetPhysicalDeviceFeatures2(m_physical_device, &features2);
+
+    if (!accelFeatures.accelerationStructure) {
+        std::cerr << "VK_KHR_acceleration_structure not supported!" << std::endl;
+    }
+
     m_phyisical_device_properties2.sType       = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_PROPERTIES_2;
     m_physical_device_features2.sType          = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_FEATURES_2;
     m_physical_device_memory_properties2.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_MEMORY_PROPERTIES_2;
@@ -159,81 +172,164 @@ void DeviceVK::createDevice()
 {
 
     // Desired queues need to be requested upon logical device creation
-    // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if the application
-    // requests different queue types
+    // Due to differing queue family configurations of Vulkan implementations this can be a bit tricky, especially if
+    // the application requests different queue types
     std::vector<VkDeviceQueueCreateInfo> queue_create_infos{};
 
     // Get queue family indices for the requested queue family types
     // Note that the indices may overlap depending on the implementation
 
-    const float default_queue_priority( 0.0f );
+    const float default_queue_priority(0.0f);
 
     // Graphics queue
-    m_graphics_queue_index = getQueueFamilyIndex( VK_QUEUE_GRAPHICS_BIT );
-    
+    m_graphics_queue_index = getQueueFamilyIndex(VK_QUEUE_GRAPHICS_BIT);
+
     VkDeviceQueueCreateInfo queue_info{};
-    queue_info.sType            = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+    queue_info.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
     queue_info.queueFamilyIndex = m_graphics_queue_index;
-    queue_info.queueCount       = 1;
+    queue_info.queueCount = 1;
     queue_info.pQueuePriorities = &default_queue_priority;
-    queue_create_infos.push_back( queue_info );
-    
+    queue_create_infos.push_back(queue_info);
 
     // Create the logical device representation
     // If the device will be used for presenting to a display via a swapchain we need to request the swapchain extension
-    m_extensions.push_back( VK_KHR_SWAPCHAIN_EXTENSION_NAME              );
-    m_extensions.push_back( VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME );
-    m_extensions.push_back( VK_KHR_MAINTENANCE1_EXTENSION_NAME           );
+    m_extensions.push_back(VK_KHR_SWAPCHAIN_EXTENSION_NAME);
+    m_extensions.push_back(VK_KHR_SHADER_DRAW_PARAMETERS_EXTENSION_NAME);
+    m_extensions.push_back(VK_KHR_MAINTENANCE1_EXTENSION_NAME);
 
     VkDeviceCreateInfo device_create_info = {};
-    device_create_info.sType                = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    device_create_info.queueCreateInfoCount = static_cast< uint32_t >( queue_create_infos.size() );
-    device_create_info.pQueueCreateInfos    = queue_create_infos.data();
-    device_create_info.pEnabledFeatures     = &m_physical_device_features;
-    device_create_info.pNext                = nullptr;
+    device_create_info.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+    device_create_info.queueCreateInfoCount = static_cast<uint32_t>(queue_create_infos.size());
+    device_create_info.pQueueCreateInfos = queue_create_infos.data();
+    // device_create_info.pEnabledFeatures     = &m_physical_device_features;
+    device_create_info.pEnabledFeatures = VK_NULL_HANDLE;
 
     // Enable the debug marker extension if it is present (likely meaning a debugging tool is present)
 #ifdef DEBUG
-    if( std::find( m_supported_extensions.begin(), m_supported_extensions.end(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME ) != m_supported_extensions.end() )
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(), VK_EXT_DEBUG_UTILS_EXTENSION_NAME) !=
+        m_supported_extensions.end())
     {
-        m_extensions.push_back( VK_EXT_DEBUG_UTILS_EXTENSION_NAME );
+        m_extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
     }
-    
+
     bool is_markers_enabled = false;
-    if( std::find( m_supported_extensions.begin(), m_supported_extensions.end(), VK_EXT_DEBUG_MARKER_EXTENSION_NAME ) != m_supported_extensions.end() )
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(), VK_EXT_DEBUG_MARKER_EXTENSION_NAME) !=
+        m_supported_extensions.end())
     {
         is_markers_enabled = true;
-        m_extensions.push_back( VK_EXT_DEBUG_MARKER_EXTENSION_NAME );
-    }
-#endif 
-
-    if( m_extensions.size() > 0 )
-    {
-        for( const char* enabled_extension : m_extensions )
-        {
-            if( !( std::find( m_supported_extensions.begin(), m_supported_extensions.end(), enabled_extension ) != m_supported_extensions.end() ) )
-            {
-                std::cerr << "Enabled device extension \"" << enabled_extension << "\" is not present at device level\n";
-            }
-        }
-
-        device_create_info.enabledExtensionCount    = ( uint32_t )m_extensions.size();
-        device_create_info.ppEnabledExtensionNames  = m_extensions.data();
-    }
-
-    if( vkCreateDevice( m_physical_device, &device_create_info, nullptr, &m_logical_device ) )
-    {
-        throw MiniEngineException( "Error creating devices" );
-    }
-
-#ifdef DEBUG
-    if( is_markers_enabled )
-    {
-        UtilsVK::setupCallbacks( *this );   
+        m_extensions.push_back(VK_EXT_DEBUG_MARKER_EXTENSION_NAME);
     }
 #endif
 
-    vkGetDeviceQueue( m_logical_device, m_graphics_queue_index, 0, &m_graphics_queue );
+    // Add Raytracing Extensions
+    // -----------------------------------------------------
+
+    VkPhysicalDeviceRayTracingPipelineFeaturesKHR rayTracingPipelineFeatures = {};
+    VkPhysicalDeviceAccelerationStructureFeaturesKHR accelerationStructureFeatures = {};
+    VkPhysicalDeviceBufferDeviceAddressFeaturesKHR bufferDeviceAddressFeatures = {};
+    VkPhysicalDeviceDescriptorIndexingFeaturesEXT descriptorIndexingFeatures = {};
+    VkPhysicalDeviceRayQueryFeaturesKHR rayQueryFeatures = {};
+
+    // Start chaining from the last element so we preserve order
+    void** pNextHead = &m_physical_device_features2.pNext;
+
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(),
+        VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME) != m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME);
+
+        accelerationStructureFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_ACCELERATION_STRUCTURE_FEATURES_KHR;
+        accelerationStructureFeatures.pNext = nullptr;
+        accelerationStructureFeatures.accelerationStructure = VK_TRUE;
+
+        *pNextHead = &accelerationStructureFeatures;
+        pNextHead = &accelerationStructureFeatures.pNext;
+    }
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(),
+        VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME) != m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME);
+
+        rayTracingPipelineFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_TRACING_PIPELINE_FEATURES_KHR;
+        rayTracingPipelineFeatures.pNext = nullptr;
+
+        *pNextHead = &rayTracingPipelineFeatures;
+        pNextHead = &rayTracingPipelineFeatures.pNext;
+    }
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(),
+        VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME) != m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_KHR_BUFFER_DEVICE_ADDRESS_EXTENSION_NAME);
+
+        bufferDeviceAddressFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_BUFFER_DEVICE_ADDRESS_FEATURES_KHR;
+        bufferDeviceAddressFeatures.pNext = nullptr;
+        bufferDeviceAddressFeatures.bufferDeviceAddress = VK_TRUE;
+
+        *pNextHead = &bufferDeviceAddressFeatures;
+        pNextHead = &bufferDeviceAddressFeatures.pNext;
+    }
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(),
+        VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME) != m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_KHR_DEFERRED_HOST_OPERATIONS_EXTENSION_NAME);
+    }
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(),
+        VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME) != m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_EXT_DESCRIPTOR_INDEXING_EXTENSION_NAME);
+
+        descriptorIndexingFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_DESCRIPTOR_INDEXING_FEATURES_EXT;
+        descriptorIndexingFeatures.pNext = nullptr;
+
+        *pNextHead = &descriptorIndexingFeatures;
+        pNextHead = &descriptorIndexingFeatures.pNext;
+    }
+    if (std::find(m_supported_extensions.begin(), m_supported_extensions.end(), VK_KHR_RAY_QUERY_EXTENSION_NAME) !=
+        m_supported_extensions.end())
+    {
+        m_extensions.push_back(VK_KHR_RAY_QUERY_EXTENSION_NAME);
+
+        rayQueryFeatures.sType = VK_STRUCTURE_TYPE_PHYSICAL_DEVICE_RAY_QUERY_FEATURES_KHR;
+        rayQueryFeatures.pNext = nullptr;
+        rayQueryFeatures.rayQuery = VK_TRUE;
+
+        *pNextHead = &rayQueryFeatures;
+        pNextHead = &rayQueryFeatures.pNext;
+    }
+
+    // -----------------------------------------------------
+
+
+    if (m_extensions.size() > 0)
+    {
+        for (const char* enabled_extension : m_extensions)
+        {
+            if (!(std::find(m_supported_extensions.begin(), m_supported_extensions.end(), enabled_extension) !=
+                m_supported_extensions.end()))
+            {
+                std::cerr << "Enabled device extension \"" << enabled_extension
+                    << "\" is not present at device level\n";
+            }
+        }
+
+        device_create_info.pNext = &m_physical_device_features2;
+        device_create_info.enabledExtensionCount = (uint32_t)m_extensions.size();
+        device_create_info.ppEnabledExtensionNames = m_extensions.data();
+    }
+
+    if (vkCreateDevice(m_physical_device, &device_create_info, nullptr, &m_logical_device))
+    {
+        throw MiniEngineException("Error creating devices");
+    }
+
+#ifdef DEBUG
+    if (is_markers_enabled)
+    {
+        UtilsVK::setupCallbacks(*this);
+    }
+#endif
+
+    vkGetDeviceQueue(m_logical_device, m_graphics_queue_index, 0, &m_graphics_queue);
 }
 
 

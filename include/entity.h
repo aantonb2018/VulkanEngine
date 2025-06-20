@@ -31,6 +31,11 @@ namespace MiniEngine
        {
            return m_transform;
        }
+        
+        inline MeshVK& getMesh() const
+        {
+            return *m_mesh;
+        }
 
        inline Material& getMaterial() const
        {

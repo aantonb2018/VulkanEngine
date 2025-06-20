@@ -21,6 +21,17 @@ namespace MiniEngine
                             const ImageBlock& i_in_shadow_attachment,
                             const std::array<ImageBlock, 3>& i_output_swap_images 
                           );
+        
+        CompositionPassVK( 
+                            const Runtime& i_runtime,
+                            const ImageBlock& i_in_color_attachment,
+                            const ImageBlock& i_in_position_depth_attachment,
+                            const ImageBlock& i_in_normal_attachment,
+                            const ImageBlock& i_in_material_attachment,
+                            const VkAccelerationStructureKHR& i_tlas,
+                            const std::array<ImageBlock, 3>& i_output_swap_images 
+                          );
+
         virtual ~CompositionPassVK();
 
         bool            initialize() override;
@@ -62,6 +73,8 @@ namespace MiniEngine
         ImageBlock m_in_material_attachment;
         //ImageBlock m_in_blur_attachment;
         ImageBlock m_in_shadow_attachment;
+        VkAccelerationStructureKHR m_tlas;
+
         std::array<ImageBlock, 3> m_output_swap_images;
     };
 };

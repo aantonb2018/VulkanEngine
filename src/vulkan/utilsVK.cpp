@@ -190,6 +190,7 @@ void UtilsVK::createBuffer(const DeviceVK& i_device, VkDeviceSize i_size, VkBuff
     buffer_info.size = i_size;
     buffer_info.usage = i_usage;
     buffer_info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+    buffer_info.flags = VK_BUFFER_USAGE_SHADER_DEVICE_ADDRESS_BIT | VK_BUFFER_USAGE_ACCELERATION_STRUCTURE_BUILD_INPUT_READ_ONLY_BIT_KHR;
 
     if (vkCreateBuffer(i_device.getLogicalDevice(), &buffer_info, nullptr, &o_buffer) != VK_SUCCESS)
     {

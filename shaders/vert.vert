@@ -52,7 +52,7 @@ layout( location = 3 ) out flat int f_instance;
 
 void main() {
     //pos in view space
-    vec4 pos = per_object_data.objects[ gl_BaseInstance ].m_model * vec4(v_positions, 1.0);
+    vec4 pos =  per_frame_data.m_view * per_object_data.objects[ gl_BaseInstance ].m_model * vec4(v_positions, 1.0);
     f_position = pos.xyz;
 
     //normal in view space
@@ -65,5 +65,5 @@ void main() {
     //progate the id
     f_instance = gl_BaseInstance;
 
-    gl_Position = per_frame_data.m_projection * per_frame_data.m_view * pos;
+    gl_Position = per_frame_data.m_projection * pos;
 }

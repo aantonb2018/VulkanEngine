@@ -78,6 +78,8 @@ bool Engine::initialize()
 
     createSyncObjects ();
 
+    updateTLAS();
+
     return true;
 }
 
@@ -369,10 +371,10 @@ void Engine::updateGlobalBuffers()
         switch (light->m_data.m_type)
         {
         case Light::LightType::Directional:
-            lightPos = Vector3f(perframe_data.m_view_projection * Vector4f(light->m_data.m_position, 0));  // Solo direccion
+            lightPos = Vector3f(perframe_data.m_view * Vector4f(light->m_data.m_position, 0));  // Solo direccion
             break;
         case Light::LightType::Point:
-            lightPos = Vector3f(perframe_data.m_view_projection * Vector4f(light->m_data.m_position, 1));  //Tiene pos
+            lightPos = Vector3f(perframe_data.m_view * Vector4f(light->m_data.m_position, 1));  //Tiene pos
             break;
         default:
             lightPos = light->m_data.m_position;
@@ -507,3 +509,46 @@ void Engine::destroySamplers()
     }
 }
 
+//TLAS
+void Engine::updateTLAS()
+{
+#ifdef RTX
+    //Destroy previous TLAS if it exists
+    if (m_tlas_structure != VK_NULL_HANDLE)
+    {
+        vkDestroyAccelerationStructureKHR(m_runtime.m_renderer->getDevice()->getLogicalDevice(), m_tlas_structure, nullptr);
+        vkFreeMemory(m_runtime.m_renderer->getDevice()->getLogicalDevice(), m_tlas_memory, nullptr);
+        vkDestroyBuffer(m_runtime.m_renderer->getDevice()->getLogicalDevice(), m_tlas_buffer, nullptr);
+        vkDestroyBuffer(m_runtime.m_renderer->getDevice()->getLogicalDevice(), m_instances_buffer, nullptr);
+        vkFreeMemory(m_runtime.m_renderer->getDevice()->getLogicalDevice(), m_instances_memory, nullptr);
+    }
+
+    // Get all entities from the scene
+    auto entities = m_scene->getMeshes();
+
+    std::vector<Matrix4f> transforms;
+    std::vector<VkAccelerationStructureKHR> blasHandles;
+
+    transforms.reserve(entities.size());
+    blasHandles.reserve(entities.size());
+
+    for (auto entity : entities)
+    {
+        // Get transform matrix from entity
+        transforms.push_back(entity->getTransform().getTransform());
+
+        // Get BLAS from entity's mesh
+        blasHandles.push_back(entity->getMesh().getBLAS());
+    }
+
+    // Create TLAS using UtilsVK function
+    UtilsVK::createTLAS(
+        *m_runtime.m_renderer->getDevice(),
+        transforms,
+        blasHandles,
+        m_tlas_structure,
+        m_tlas_buffer,
+        m_tlas_memory
+    );
+#endif
+}

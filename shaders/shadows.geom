@@ -42,46 +42,12 @@ void main() {
 
         for (int j = 0; j < 3; ++j) {
             vec4 worldPos = vec4(g_position[j], 1.0);
-            vec4 lightSpacePos = lightVP * worldPos;
+            vec4 lightSpacePos = lightVP * per_frame_data.m_inv_view * worldPos;
             
-            // Perspective divide and invert Z
-            //lightSpacePos.w = 1 - lightSpacePos.w;  // Invert before perspective divide
             gl_Position = lightSpacePos;
             EmitVertex();
         }
 
         EndPrimitive();
     }
-	/*
-	gl_Layer = 0; // Only render to the first layer for testing
-
-    // Vertex 1 (bottom-left)
-    gl_Position = vec4(1.0, 1.0, 0.5, 1.0);
-    EmitVertex();
-
-    // Vertex 2 (top-middle)
-    gl_Position = vec4(1.0, 0.9, 0.5, 1.0);
-    EmitVertex();
-
-    // Vertex 3 (bottom-right)
-    gl_Position = vec4(0.9, 1.0, 0.5, 1.0);
-    EmitVertex();
-
-    EndPrimitive();
-	
-	gl_Layer = 0; // Only render to the first layer for testing
-
-    // Vertex 1 (bottom-left)
-    gl_Position = vec4(-1.0, -1.0, 0.5, 1.0);
-    EmitVertex();
-
-    // Vertex 2 (top-middle)
-    gl_Position = vec4(0.0, 1.0, 0.5, 1.0);
-    EmitVertex();
-
-    // Vertex 3 (bottom-right)
-    gl_Position = vec4(1.0, -1.0, 0.5, 1.0);
-    EmitVertex();
-
-    EndPrimitive();*/
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "defines.h"
+#include <scene.h>
 
 namespace MiniEngine
 {
@@ -25,6 +26,8 @@ namespace MiniEngine
         {
             return m_per_object_buffer;
         }
+
+
 
 
     private:
